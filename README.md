@@ -1,4 +1,8 @@
+# Funcall
+This is a library to access and store Function Gemma model locally and deploy it in an application.
 
+[//]: # (You can find an example of deplying the library in a simple Mobile application made by Kivy. In a separate repository, )
+[//]: # (you will find its usage as a tool in a ReAct &#40;Reasoning Action&#41; agent.)
 
 ### Build:
 Ensure you have the build tools installed:
