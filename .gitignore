@@ -3,3 +3,7 @@ dist/
 .idea/
 src/.DS_Store
 .DS_Store
+tests/.env
+
+model/
+*.ini
