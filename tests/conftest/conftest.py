@@ -38,7 +38,7 @@ def prompt():
 
 @pytest.fixture(scope = "session")
 def access_token():
-     return os.environ.get("HUG_ACCESS_TOKEN") 
+     return os.environ.get("HUG_ACCESS_TOKEN")
 
 @pytest.fixture(scope = "session")
 def tools():

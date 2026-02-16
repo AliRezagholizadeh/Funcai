@@ -50,9 +50,9 @@ def get_module_functions(module_name:str, module_abs_dir:str, logger: logging=No
 
             # Access all functions defined in the module
 
-            for name, obj in inspect.getmembers(module, inspect.isdatadescriptor()):
-                if logger:
-                    logger.info(f" * import_script: to get functions - name: {name} , obj: {obj}")
+            # for name, obj in inspect.getmembers(module):
+            #     if logger:
+            #         logger.info(f" * import_script: to get functions - name: {name} , obj: {obj}")
             for name, obj in inspect.getmembers(module, inspect.isfunction):
                 # Ensure the function is actually defined in this module and not an imported one
                 if logger:
@@ -78,7 +78,7 @@ def call_func(output: str = "", functions_script_name:str = "", module_abs_dir:s
     try:
         functions = get_module_functions(functions_script_name, module_abs_dir, logger)
     except Exception as e:
-        logger.error(f"FuncGemma - call_func: Error in importing Function ({functions_script_name}) from {module_abs_dir}")
+        logger.error(f"FuncGemma - call_func: Error in importing module ({functions_script_name}) from {module_abs_dir}")
 
     calls = None
     try:
@@ -97,7 +97,7 @@ def call_func(output: str = "", functions_script_name:str = "", module_abs_dir:s
         #     logger.info(f"call_func: {message[-1]}")
         # Call the function and get the result
         #####################################
-        # WARNING: This is a demonstration. #
+        # WARNING: This is a demonstration. #car
         #####################################
         # Using globals() to call functions dynamically can be dangerous in
         # production. In a real application, you should implement a secure way to

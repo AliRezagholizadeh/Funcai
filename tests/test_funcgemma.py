@@ -14,7 +14,7 @@ TEST_DIR_PATH = Path(".").absolute()
 sys.path.append(str(TEST_DIR_PATH))
 from conftest import *
 
-def test_funcgemma(prompt:str, access_token:str, tools: list, function_name:str, function_module_dir:str, logger: logging):
+def test_funcgemma_(prompt:str, access_token:str, tools: list, function_name:str, function_module_dir:str, logger: logging):
     # API access token
     env_path = Path(".").absolute()/ "tests"/ ".env"
     print("env_path: ", env_path)
@@ -36,7 +36,7 @@ def test_funcgemma(prompt:str, access_token:str, tools: list, function_name:str,
 
     }
     fg = FGmodel_pipeline(**input_)
-    prompt = 'Schedule a "team meeting" tomorrow at 4pm.'
+    # prompt = 'Schedule a "team meeting" tomorrow at 4pm.'
     messages = fg.infer(prompt)
     
     print(f"Test: messages: {messages}")

@@ -7,3 +7,6 @@ tests/.env
 
 model/
 *.ini
+
+__pycache__/
+*.pyc
