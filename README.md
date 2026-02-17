@@ -73,7 +73,7 @@ pip install -e .
 You can then import it into a Python session or another project and use your functions:
 
 ```Python
-from Funcall.funcgemma import FGmodel_pipeline
+from Funcai.funcgemma import FGmodel_pipeline
 ```
 
 

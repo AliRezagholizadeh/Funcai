@@ -1,5 +1,5 @@
 [project]
-name = "Funcall" # Must be a unique name on PyPI
+name = "Funcai"
 version = "0.0.1"
 description = "A script to use Function Gemma capabilities."
 authors = [
@@ -22,5 +22,5 @@ dependencies = [
 requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 [project.urls]
-Homepage = "https://github.com/AliRezagholizadeh/Funcall#"
-Issues = "https://github.com/AliRezagholizadeh/Funcall/issues"
+Homepage = "https://github.com/AliRezagholizadeh/Funcai#"
+Issues = "https://github.com/AliRezagholizadeh/Funcai/issues"

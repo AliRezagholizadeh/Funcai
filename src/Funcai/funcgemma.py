@@ -8,7 +8,7 @@ from typing import Callable
 from pathlib import Path
 import sys
 
-curr_dir = Path(".").absolute() / "src" / "Funcall"
+curr_dir = Path(".").absolute() / "src" / "Funcai"
 print(f"curr_dir: {curr_dir}")
 sys.path.append(str(curr_dir))
 from FuncGemma.model import get_model

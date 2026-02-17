@@ -8,7 +8,7 @@ import sys
 SRC_DIR_PATH = Path(".").parent / "src"
 print("src_dir: ", SRC_DIR_PATH)
 sys.path.append(str(SRC_DIR_PATH))
-from Funcall.funcgemma import FGmodel_pipeline
+from Funcai.funcgemma import FGmodel_pipeline
 
 TEST_DIR_PATH = Path(".").absolute()
 sys.path.append(str(TEST_DIR_PATH))
