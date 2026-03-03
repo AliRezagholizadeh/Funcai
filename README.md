@@ -6,17 +6,23 @@ It just needs to provide relevant functions (which the model has trained on) as 
 [//]: # (You can find an example of deplying the library in a simple Mobile application made by Kivy. In a separate repository, )
 [//]: # (you will find its usage as a tool in a ReAct &#40;Reasoning Action&#41; agent.)
 
-### Function Gemma
+## Function Gemma
 Function Gemma is a lightweight model trained by Google to call relevant functions it has been trained on. We used 
 [litert-community/FunctionGemma_270M_Mobile_Actions](https://huggingface.co/litert-community/FunctionGemma_270M_Mobile_Actions) as a default.
 It is a fine-tuned version which trained on [google/mobile-actions](https://huggingface.co/datasets/google/mobile-actions). As mentioned there, the model is optimized to call these mobile action functions:
 
 1- turn_on_flashlight() - Turns the device flashlight on
+
 2- turn_off_flashlight() - Turns the device flashlight off
+
 3- create_contact(first_name, last_name, phone_number?, email?) - Creates a new contact
+
 4- send_email(to, subject, body?) - Sends an email to a recipient
+
 5- show_map(query) - Displays a location on the map by name, business, or address
+
 6- open_wifi_settings() - Opens the Wi-Fi settings screen
+
 7- create_calendar_event(title, datetime) - Creates a calendar event (datetime in ISO format: YYYY-MM-DDTHH:MM:SS)
 
 
@@ -25,16 +31,13 @@ To adjust the functions, please follow ```tests/utils/Functions.py```. There, yo
 - update FG_tools_list
 
 
-# Funcai setup
+# setup
 You need to provide API keys from Hugging Face (to load Function Gemma 270M Mobile Actions). To do so, you need to create an account on the [Hugging Face](https://huggingface.co/), log in to it and, navigate to the Access Tokens section in your settings.
 
 For the test, you need to store it as an env variable:
 ```.env in ReAct folder
 HUG_ACCESS_TOKEN = "Your Hugging Face API key"
 ```
-
-
-
 
 
 ## Environment Setup
@@ -103,7 +106,7 @@ pip install -e .
 ```
 
 
-### Sample code
+## Sample code
 You can then import it into a Python session or another project and use your own functions:
 
 ```Python
