@@ -1,6 +1,7 @@
-
+import copy
 from datetime import datetime
 # from Functions import tools
+import dotenv
 from transformers import pipeline
 from zoneinfo import ZoneInfo
 import logging
@@ -9,11 +10,11 @@ from pathlib import Path
 import sys
 
 curr_dir = Path(".").absolute() / "src" / "Funcai"
-print(f"curr_dir: {curr_dir}")
+# print(f"curr_dir: {curr_dir}")
 sys.path.append(str(curr_dir))
-from FuncGemma.model import get_model
-from FuncGemma.parser import call_func
-from FuncGemma.utils import CHATSIDE, Role
+from Funcai.FuncGemma.model import get_model
+from Funcai.FuncGemma.parser import call_func, get_module_functions
+from Funcai.FuncGemma.utils import CHATSIDE, Role
 
 weekdays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 
@@ -31,7 +32,8 @@ class FGBasemodel:
         ]
     tools = []
 
-    def __init__(self, model_name: str = "litert-community/FunctionGemma_270M_Mobile_Actions", access_token: str="", model_base_dir: str= "", tools:list= [], functions_script_name: str= "", functions_abs_path: str= "", logger: logging = None):
+    # def __init__(self, model_name: str = "litert-community/FunctionGemma_270M_Mobile_Actions", access_token: str="", model_base_dir: str= "", tools:list= [], functions_script_name: str= "", functions_abs_path: str= "", logger: logging = None):
+    def __init__(self, model_name: str = "litert-community/FunctionGemma_270M_Mobile_Actions", access_token: str="", model_base_dir: str= "", tools:list= [], functions: dict = {}, logger: logging = None):
         """
 
         Parameters:
@@ -61,18 +63,23 @@ class FGBasemodel:
                     },
                 }
             }
-        functions_script_name: name of the Python script to import containing the functions to call
-        functions_abs_path: abs path to the functions_script_name
+        # functions_script_name: name of the Python script to import containing the functions to call
+        # functions_abs_path: abs path to the functions_script_name
+        functions: a dictionary containing all functions mentioned in the tools list.
         logger: logging instance to store the logs.
         """
         self.model_name = model_name
         self.access_token = access_token
         self.model_base_dir = model_base_dir
-        self.functions_script_name = functions_script_name
-        self.functions_abs_path = functions_abs_path
+        # self.functions_script_name = functions_script_name
+        # self.functions_abs_path = functions_abs_path
+        self.functions = functions
         self.logger = logger
         # load determined model
-        self.load_model()
+        if(self.access_token):
+            self.load_model()
+        else:
+            self.logger.error("access_token is not provided.")
         [self.tools.append(t) for t in tools]
         
 
@@ -86,17 +93,26 @@ class FGBasemodel:
     def add_tools(self, tools):
         self.tools += tools
     
-    @staticmethod    
-    def re_new_message_dec(func):
-        def wrapper(*args, **keyargs):
-            self = args[0]
-            print("func: ", func)
-            print("args: ", args)
-            print("keyargs: ", keyargs)
-            self.message = FGBasemodel.message_
-            result = func(*args, **keyargs)
-            return result
-        return wrapper
+    @classmethod
+    def re_new_message_dec(cls, _):
+        def wrap_1(func):
+            # print("func: ", func)
+            def wrapper(self, *args, **keyargs):
+                # self = args[0]
+                # print(f"cls type: {type(cls)} - cls: {cls} - is instance: {isinstance(cls, FGBasemodel)} - is string: {isinstance(cls, str)}")
+                # print("clas: ", clas)
+                # print("func: ", func)
+                # print("args: ", [_ for _ in args])
+                # print("keyargs: ", keyargs)
+
+                self.message = copy.deepcopy(cls(logger= self.logger).message_)
+                print("FGBasemodel.message_: ", FGBasemodel.message_)
+                print("message: ", self.message)
+
+                result = func(self, *args, **keyargs)
+                return result
+            return wrapper
+        return wrap_1
 
 class FGmodel(FGBasemodel):
     @FGBasemodel.re_new_message_dec
@@ -106,6 +122,7 @@ class FGmodel(FGBasemodel):
              "content": prompt}
         ]
         self.message += new_message
+        print(f"FGmodel-infer – new_message: {new_message}")
         if self.logger:
             self.logger.info(f"FGmodel-infer – new_message: {new_message}")
 
@@ -118,9 +135,16 @@ class FGmodel(FGBasemodel):
 
         if self.logger:
             self.logger.info(f"FGmodel-infer – output 1: {output}")
+        else:
+            print("*** there is no logger set.")
         # call right function inside the Functions.py
         # TODO: you might want to reform the call_func to be class with initialized variables and run func.
-        message_res = call_func(output = output, functions_script_name=self.functions_script_name, script_path= self.functions_abs_path, logger= self.logger)
+        print(f"FGmodel-infer – to call func with this output {output}")
+        
+
+        # message_res = call_func(output= output, functions_script_name=self.functions_script_name, module_abs_dir=self.functions_abs_path, logger=self.logger)
+        message_res = call_func(output = output, functions = self.functions, logger= self.logger)
+
 
         self.message += message_res
         if self.logger:
@@ -157,11 +181,12 @@ class FGmodel(FGBasemodel):
 
 class FGmodel_pipeline(FGBasemodel):
     def __init__(self, *args, **kwargs):
+        print(f"args: {args} - kwargs: {kwargs}")
         super().__init__(*args, **kwargs)
         # self.tokenizer = self.processor.backend_tokenizer
         self.pipe = pipeline("text-generation", model=self.model, tokenizer=self.tokenizer)
 
-    @FGBasemodel.re_new_message_dec
+    @FGBasemodel.re_new_message_dec(FGBasemodel)
     def infer(self, prompt:str, write_call_back:Callable = None):
 
         new_message = [
@@ -189,13 +214,17 @@ class FGmodel_pipeline(FGBasemodel):
             # print("Pipeline output 1:", output)
             if self.logger:
                 self.logger.info(f"FGmodel_pipeline-infer – pipe output: {output}")
+            else:
+                print("*** there is no logger set.")
 
             if(output):
                 # call right function inside the Functions.py
                 # TODO: you might want to reform the call_func to be class with initialized variables and run func.
                 try:
-                    message_res = call_func(output= output, functions_script_name=self.functions_script_name,
-                                            module_abs_dir=self.functions_abs_path, logger=self.logger)
+
+                    print(f"FGmodel-infer – to call func with this output {output}")
+                    # message_res = call_func(output= output, functions_script_name=self.functions_script_name, module_abs_dir=self.functions_abs_path, logger=self.logger)
+                    message_res = call_func(output= output, functions= self.functions, logger=self.logger)
 
                     self.message += message_res
                     # history.append(message_res)
@@ -226,3 +255,95 @@ class FGmodel_pipeline(FGBasemodel):
         return self.message
 
 
+
+
+if __name__ == "__main__":
+    import os
+
+
+
+    # Get the absolute path of the directory containing the current script
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    print(f"current_dir: {current_dir}")
+
+    # Construct the path to the parent directory
+    TEST_DIR_PATH = Path(current_dir).parent.parent / 'tests'
+    print(f"test_dir: {TEST_DIR_PATH}")
+
+    # API access token
+    env_path = TEST_DIR_PATH / ".env"
+    print("env_path: ", env_path)
+    dotenv.load_dotenv(dotenv_path=env_path)
+
+    func_dir = TEST_DIR_PATH / 'utils'
+    print(f"func_dir: {func_dir}")
+    # Add the src directory to the system path
+    sys.path.append(str(func_dir))
+
+    from Functions import *
+    from dotenv import load_dotenv
+
+    # ---------
+    LOG_DIR = "logs"
+    logdir = TEST_DIR_PATH / LOG_DIR
+    logdir.mkdir(parents=True, exist_ok=True)
+    datetime_now = f"{datetime.now(ZoneInfo('America/Toronto')).strftime('%Y-%m-%dT%H:%M:%S %Z')}"
+    logging.basicConfig(filename=f'{logdir}/test_run_{datetime_now}.log', level=logging.INFO,
+                        format='%(asctime)s:%(levelname)s:%(name)s:%(message)s')
+
+    # Create a logger for the main module
+    logger = logging.getLogger(__name__)
+
+    access_token = os.environ.get("HUG_ACCESS_TOKEN")
+
+    tools = tools_list
+
+    function_name = "Functions"
+    function_module_dir = f"{func_dir}/{function_name}.py"
+    # ---------
+    # API access token
+    env_path = Path(".").absolute() / "tests" / ".env"
+    print("env_path: ", env_path)
+    load_dotenv(dotenv_path=env_path)
+
+    # model_name = "google/functiongemma-270m-it"
+    model_name = "litert-community/FunctionGemma_270M_Mobile_Actions"
+
+    model_base_dir_path = TEST_DIR_PATH / f"model"
+
+    # take functions
+    functions = {}
+    try:
+        functions = get_module_functions(function_name, function_module_dir, logger)
+    except Exception as e:
+        logger.error(
+            f"FuncGemma - call_func: Error in importing module ({function_name}) from {function_module_dir}: {e}")
+        raise e
+
+    input_ = {
+        "model_name": model_name,
+        "access_token": access_token,
+        "model_base_dir": str(model_base_dir_path),
+        "tools": tools,
+        # "functions_script_name": function_name,
+        # "functions_abs_path": function_module_dir,
+        "functions": functions,
+        "logger": logger
+
+    }
+    fg = FGmodel_pipeline(**input_)
+
+    # prompt = 'what is the temperature in Tehran?'
+    prompt = 'Find the current temperature for Tehran'
+    # prompt = 'Schedule a "team meeting" tomorrow at 4pm.'
+    messages = fg.infer(prompt)
+
+    print(f"Test: messages: {messages}")
+    print(f"Test: messages: {messages[-1]['content']}")
+
+    # prompt = 'Find the current temperature for Tehran'
+    prompt = "put on my calendar my tomorrow's meeting at 10am with Nikolaj."
+    messages = fg.infer(prompt)
+
+    print(f"Test: messages: {messages}")
+    print(f"Test: messages: {messages[-1]['content']}")

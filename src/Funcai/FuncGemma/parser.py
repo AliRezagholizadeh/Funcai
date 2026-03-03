@@ -29,9 +29,9 @@ def get_module_functions(module_name:str, module_abs_dir:str, logger: logging=No
     # get spec
     spec = importlib.util.spec_from_file_location(module_name, module_abs_dir)
     if spec is None:
-        print(f"Could not find spec for {script_abs_path}")
+        print(f"Could not find spec for {module_abs_dir}")
         if logger:
-            logger.error(f"import_script: Could not find spec for {script_abs_path}")
+            logger.error(f"import_script: Could not find spec for {module_abs_dir}")
     else:
         if logger:
             logger.info(f"import_script: spec: {spec}")
@@ -73,12 +73,13 @@ def get_module_functions(module_name:str, module_abs_dir:str, logger: logging=No
 
 
 
-def call_func(output: str = "", functions_script_name:str = "", module_abs_dir:str = "", logger: logging = None):
-    functions = {}
-    try:
-        functions = get_module_functions(functions_script_name, module_abs_dir, logger)
-    except Exception as e:
-        logger.error(f"FuncGemma - call_func: Error in importing module ({functions_script_name}) from {module_abs_dir}")
+# def call_func(output: str = "", functions_script_name:str = "", module_abs_dir:str = "", logger: logging = None):
+def call_func(output: str = "", functions: dict = {}, logger: logging = None):
+    # functions = {}
+    # try:
+    #     functions = get_module_functions(functions_script_name, module_abs_dir, logger)
+    # except Exception as e:
+    #     logger.error(f"FuncGemma - call_func: Error in importing module ({functions_script_name}) from {module_abs_dir}")
 
     calls = None
     try:

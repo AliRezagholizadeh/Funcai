@@ -14,7 +14,8 @@ TEST_DIR_PATH = Path(".").absolute()
 sys.path.append(str(TEST_DIR_PATH))
 from conftest import *
 
-def test_funcgemma_(prompt:str, access_token:str, tools: list, function_name:str, function_module_dir:str, logger: logging):
+# def test_funcgemma_(prompt:str, access_token:str, tools: list, function_name:str, function_module_dir:str, logger: logging):
+def test_funcgemma_(prompt:str, access_token:str, tools: list, functions: dict, logger: logging):
     # API access token
     env_path = Path(".").absolute()/ "tests"/ ".env"
     print("env_path: ", env_path)
@@ -25,13 +26,16 @@ def test_funcgemma_(prompt:str, access_token:str, tools: list, function_name:str
 
 
     model_base_dir_path = TEST_DIR_PATH / f"model"
+
+
     input_ = {
         "model_name": model_name,
         "access_token": access_token,
         "model_base_dir": str(model_base_dir_path),
         "tools": tools,
-        "functions_script_name": function_name,
-        "functions_abs_path": function_module_dir,
+        # "functions_script_name": function_name,
+        # "functions_abs_path": function_module_dir,
+        "functions": functions,
         "logger": logger
 
     }
