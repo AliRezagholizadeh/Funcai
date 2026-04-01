@@ -6,21 +6,24 @@ from dotenv import load_dotenv
 import os
 import logging
 
-MODEL_BASE_DIR = "model/FunctionGemma327M_action"
+DEFAULT_MODEL_BASE_DIR = "model/FunctionGemma327M_action"
 
 def get_model_dir_path(model_name:str, base_dir:str= None, pre_trained:bool = True)->Path:
-    train_status = "fine_tunned"
-    if(pre_trained):
-        train_status = "pre_trained"
+    # train_status = "fine_tunned"
+    # if(pre_trained):
+    #     train_status = "pre_trained"
 
     # model base dir
     if(base_dir):
-        model_base_path = Path(".") / base_dir
+        model_base_path = Path(base_dir)
+        # model_base_path = Path(".") / base_dir
     else:
-        model_base_path = Path(".") / MODEL_BASE_DIR
+        model_base_path = Path(".") / DEFAULT_MODEL_BASE_DIR
+
 
     # model dir path
-    model_dir_path = model_base_path / train_status / model_name
+    # model_dir_path = model_base_path / train_status / model_name
+    model_dir_path = model_base_path / model_name
 
     # check/make 
     if not model_dir_path.is_dir():
