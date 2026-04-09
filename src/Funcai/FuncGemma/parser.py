@@ -74,7 +74,7 @@ def get_module_functions(module_name:str, module_abs_dir:str, logger: logging=No
 
 
 # def call_func(output: str = "", functions_script_name:str = "", module_abs_dir:str = "", logger: logging = None):
-def call_func(output: str = "", functions: dict = {}, logger: logging = None):
+def call_func(output: str = "", functions: dict = {}, call_function_active: bool = True, logger: logging = None):
     # functions = {}
     # try:
     #     functions = get_module_functions(functions_script_name, module_abs_dir, logger)
@@ -104,21 +104,22 @@ def call_func(output: str = "", functions: dict = {}, logger: logging = None):
         # production. In a real application, you should implement a secure way to
         # map function names to actual function calls, such as a predefined
         # dictionary of allowed tools and their implementations.
-        results = None
-        try:
-            results = [
-                # {"name": c['name'], "response": globals()[c['name']](**c['arguments'])}
-                {"name": c['name'], "response": functions[c['name']](**c['arguments'])}
-                for c in calls
-            ]
-            logger.info(f"FuncGemma - call_func: results: {results}")
-        except Exception as e:
-            logger.error(f"FuncGemma - call_func: Error in calling a function: {e}.")
+        if(call_function_active):
+            results = None
+            try:
+                results = [
+                    # {"name": c['name'], "response": globals()[c['name']](**c['arguments'])}
+                    {"name": c['name'], "response": functions[c['name']](**c['arguments'])}
+                    for c in calls
+                ]
+                logger.info(f"FuncGemma - call_func: results: {results}")
+            except Exception as e:
+                logger.error(f"FuncGemma - call_func: Error in calling a function: {e}.")
 
-        message.append({
-            "role": "tool",
-            "content": results
-        })
+            message.append({
+                "role": "tool",
+                "content": results
+            })
         # print("call_func: ", message[-1])
         # if logger:
         #     logger.info(f"call_func: {message[-1]}")

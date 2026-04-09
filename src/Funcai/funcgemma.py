@@ -33,7 +33,7 @@ class FGBasemodel:
     tools = []
 
     # def __init__(self, model_name: str = "litert-community/FunctionGemma_270M_Mobile_Actions", access_token: str="", model_base_dir: str= "", tools:list= [], functions_script_name: str= "", functions_abs_path: str= "", logger: logging = None):
-    def __init__(self, model_name: str = "litert-community/FunctionGemma_270M_Mobile_Actions", access_token: str="", model_base_dir: str= "", tools:list= [], functions: dict = {}, logger: logging = None):
+    def __init__(self, model_name: str, access_token: str="", model_base_dir: str= "", tools:list= [], functions: dict = {}, logger: logging = None):
         """
 
         Parameters:
@@ -68,6 +68,7 @@ class FGBasemodel:
         functions: a dictionary containing all functions mentioned in the tools list.
         logger: logging instance to store the logs.
         """
+        assert model_name, "model_name is not defined."
         self.model_name = model_name
         self.access_token = access_token
         self.model_base_dir = model_base_dir
@@ -76,15 +77,15 @@ class FGBasemodel:
         self.functions = functions
         self.logger = logger
         # load determined model
-        if(self.access_token):
-            self.load_model()
-        else:
-            self.logger.error("access_token is not provided.")
+        # if(self.access_token):
+        self.load_model()
+        # else:
+        #     self.logger.error("access_token is not provided.")
         [self.tools.append(t) for t in tools]
         
 
     def load_model(self):
-        self.model, self.processor, self.tokenizer, self.device = get_model(self.access_token, self.model_name, self.model_base_dir, self.logger)
+        self.model, self.processor, self.tokenizer, self.device = get_model(access_token=self.access_token, model_name=self.model_name, model_base_dir = self.model_base_dir, logger = self.logger)
         print("model loaded.")
 
     def add_message(self, message):
@@ -105,7 +106,8 @@ class FGBasemodel:
                 # print("args: ", [_ for _ in args])
                 # print("keyargs: ", keyargs)
 
-                self.message = copy.deepcopy(cls(logger= self.logger).message_)
+                # self.message = copy.deepcopy(cls(model_name=self.model_name, access_token=self.access_token, model_base_dir=self.model_base_dir, tools= self.tools, functions=self.functions, logger= self.logger).message_)
+                self.message = copy.deepcopy(cls.message_)
                 print("FGBasemodel.message_: ", FGBasemodel.message_)
                 print("message: ", self.message)
 
@@ -116,7 +118,7 @@ class FGBasemodel:
 
 class FGmodel(FGBasemodel):
     @FGBasemodel.re_new_message_dec
-    def infer(self, prompt:str, write_call_back:Callable = None):
+    def infer(self, prompt:str, call_function_active:bool = True, write_call_back:Callable = None):
         new_message = [
             {"role": Role.User.value,
              "content": prompt}
@@ -143,7 +145,7 @@ class FGmodel(FGBasemodel):
         
 
         # message_res = call_func(output= output, functions_script_name=self.functions_script_name, module_abs_dir=self.functions_abs_path, logger=self.logger)
-        message_res = call_func(output = output, functions = self.functions, logger= self.logger)
+        message_res = call_func(output = output, functions = self.functions, call_function_active=call_function_active, logger= self.logger)
 
 
         self.message += message_res
@@ -187,7 +189,7 @@ class FGmodel_pipeline(FGBasemodel):
         self.pipe = pipeline("text-generation", model=self.model, tokenizer=self.tokenizer)
 
     @FGBasemodel.re_new_message_dec(FGBasemodel)
-    def infer(self, prompt:str, write_call_back:Callable = None):
+    def infer(self, prompt:str, call_function_active:bool = True, write_call_back:Callable = None):
 
         new_message = [
             {"role": Role.User.value,
@@ -198,7 +200,8 @@ class FGmodel_pipeline(FGBasemodel):
             self.logger.info(f"FGmodel_pipeline-infer – new_message: {new_message}")
 
         # history = []
-        while True:
+        thought_iterations = 1
+        while (thought_iterations:= thought_iterations - 1) >=0:
             # Apply chat template
             # templated_message = message_template(self.message, history, self.tools)
             prompt = self.tokenizer.apply_chat_template(
@@ -224,7 +227,7 @@ class FGmodel_pipeline(FGBasemodel):
 
                     print(f"FGmodel-infer – to call func with this output {output}")
                     # message_res = call_func(output= output, functions_script_name=self.functions_script_name, module_abs_dir=self.functions_abs_path, logger=self.logger)
-                    message_res = call_func(output= output, functions= self.functions, logger=self.logger)
+                    message_res = call_func(output= output, functions= self.functions, call_function_active= call_function_active, logger=self.logger)
 
                     self.message += message_res
                     # history.append(message_res)

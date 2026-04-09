@@ -4,10 +4,10 @@ dist/
 src/.DS_Store
 .DS_Store
 tests/.env
-
+data/
 model/
 *.ini
-
+tests/utils/plyer_mobile_functions.py
 __pycache__/
 *.pyc
 

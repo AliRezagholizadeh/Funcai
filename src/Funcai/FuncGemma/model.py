@@ -82,6 +82,7 @@ def get_model(access_token:str, model_name:str , model_base_dir:str = None, logg
         # access_token = os.environ.get("HUG_ACCESS_TOKEN")
 
         # login Hugging Face
+        assert access_token, "access_token is not provided."
         login(access_token)
         if logger:
             logger.info(">> Logged in Hugging Face. <<")
@@ -89,8 +90,8 @@ def get_model(access_token:str, model_name:str , model_base_dir:str = None, logg
         # DOWNLOAD functiongemma model and processor
         processor = AutoProcessor.from_pretrained(model_name, device_map="auto", fix_mistral_regex=True)
         processor.save_pretrained(model_path)
-        # tokenizer = AutoTokenizer.from_pretrained(model_name)
-        # tokenizer.save_pretrained(model_path)
+        tokenizer = AutoTokenizer.from_pretrained(model_name)
+        tokenizer.save_pretrained(model_path)
         model = AutoModelForCausalLM.from_pretrained(model_name, dtype="auto", device_map="auto")
         model.save_pretrained(model_path)
         

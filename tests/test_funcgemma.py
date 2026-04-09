@@ -22,7 +22,8 @@ def test_funcgemma_(prompt:str, access_token:str, tools: list, functions: dict, 
     load_dotenv(dotenv_path = env_path)
 
     # model_name = "google/functiongemma-270m-it"
-    model_name = "litert-community/FunctionGemma_270M_Mobile_Actions"
+    # model_name = "litert-community/FunctionGemma_270M_Mobile_Actions"
+    model_name = "AliRGHZ/functiongemma-270m-it-extended-mobile-actions"
 
 
     model_base_dir_path = TEST_DIR_PATH / f"model"
@@ -41,6 +42,6 @@ def test_funcgemma_(prompt:str, access_token:str, tools: list, functions: dict, 
     }
     fg = FGmodel_pipeline(**input_)
     # prompt = 'Schedule a "team meeting" tomorrow at 4pm.'
-    messages = fg.infer(prompt)
+    messages = fg.infer()
     
     print(f"Test: messages: {messages}")
